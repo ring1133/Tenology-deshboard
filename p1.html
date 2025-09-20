@@ -1,0 +1,325 @@
+<!DOCTYPE html>   
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technology Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: #f5f7fa;
+      font-family: Arial, sans-serif;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      background: #121212;
+      color: #eaeaea;
+    }
+    .sidebar {
+      height: 100vh;
+      background: #1e1e2f;
+      color: white;
+      padding: 20px;
+      position: fixed;
+      width: 220px;
+      text-align: center;
+    }
+    body.dark .sidebar {
+      background: #000000;
+    }
+    .sidebar img {
+      width: 100px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+    .sidebar h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .sidebar a {
+      color: #ddd;
+      display: block;
+      padding: 10px 0;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .sidebar a:hover {
+      color: white;
+    }
+    .sidebar .footer-note {
+      font-size: 12px;
+      margin-top: 30px;
+      color: #aaa;
+    }
+    .main {
+      margin-left: 240px;
+      padding: 20px;
+    }
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark .card {
+      background: #1f1f1f;
+      color: #eaeaea;
+    }
+    canvas {
+      max-height: 300px;
+    }
+    .content-section {
+      margin-top: 30px;
+      display: none;
+    }
+    .content-section.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Add your uploaded logo -->
+    <h2>Tech Dashboard</h2>
+    <a data-section="overview">Overview</a>
+    <a data-section="ai-trends">AI Trends</a>
+    <a data-section="cybersecurity">Cybersecurity</a>
+    <a data-section="cloud">Cloud</a>
+    <a data-section="settings">Settings</a>
+    <div class="footer-note">
+      Created by Swam Pyae <br> Created by Htet Aung Kyaw
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <h1>Technology Insights</h1>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h5>AI Market Growth</h5>
+          <canvas id="aiChart"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h5>Cybersecurity Investment</h5>
+          <canvas id="securityChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sections -->
+    <div id="overview" class="content-section active">
+      <h3>Overview</h3>
+      <p>This dashboard gives insights into technology markets, trends, and investments.</p>
+      <ul>
+        <li>Total AI Market Projection: <strong>$220B by 2025</strong></li>
+        <li>Cybersecurity Spending: <strong>$120B in USA</strong></li>
+        <li>Cloud Adoption: Growing worldwide</li>
+      </ul>
+      <button class="btn btn-info" onclick="alert('Overview data refreshed!')">Refresh Overview</button>
+    </div>
+
+    <div id="ai-trends" class="content-section">
+      <h3>AI Trends</h3>
+      <ul id="aiTrendList">
+        <li>Healthcare: AI-driven diagnostics improving patient care.</li>
+        <li>Finance: Fraud detection using Machine Learning.</li>
+        <li>Retail: Personalized shopping experiences with AI.</li>
+        <li>Transportation: Self-driving technologies in development.</li>
+      </ul>
+      <canvas id="aiUseCaseChart"></canvas>
+      <button class="btn btn-success mt-3" onclick="addAITrend()">Add AI Trend</button>
+    </div>
+
+    <div id="cybersecurity" class="content-section">
+      <h3>Cybersecurity</h3>
+      <p>Key areas of cybersecurity investment:</p>
+      <ul>
+        <li>Network Security</li>
+        <li>Cloud Security</li>
+        <li>Endpoint Protection</li>
+        <li>Threat Intelligence</li>
+      </ul>
+      <canvas id="cyberPieChart"></canvas>
+      <button class="btn btn-danger mt-3" onclick="alert('Cybersecurity risk report generated!')">Generate Report</button>
+    </div>
+
+    <div id="cloud" class="content-section">
+      <h3>Cloud</h3>
+      <p>Cloud adoption is accelerating:</p>
+      <ul>
+        <li>Public Cloud Services</li>
+        <li>Private Cloud Solutions</li>
+        <li>Hybrid Cloud Deployments</li>
+      </ul>
+      <canvas id="cloudChart"></canvas>
+      <button class="btn btn-primary mt-3" onclick="alert('Cloud data synced!')">Sync Cloud</button>
+    </div>
+
+    <!-- Updated Settings Section -->
+    <div id="settings" class="content-section">
+      <h3>Settings</h3>
+      <p>Customize your dashboard:</p>
+      <form>
+        <div class="mb-3">
+          <label class="form-label">Theme</label>
+          <select id="themeSelect" class="form-select" onchange="toggleTheme()">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Notifications</label>
+          <input type="checkbox" id="notifyCheck"> Enable alerts
+        </div>
+        <button type="button" class="btn btn-primary" onclick="saveSettings()">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Charts
+    new Chart(document.getElementById("aiChart"), {
+      type: "line",
+      data: {
+        labels: ["2021", "2022", "2023", "2024", "2025"],
+        datasets: [{
+          label: "AI Growth (Billion $)",
+          data: [50, 75, 110, 160, 220],
+          borderColor: "blue",
+          fill: false
+        }]
+      }
+    });
+
+    new Chart(document.getElementById("securityChart"), {
+      type: "bar",
+      data: {
+        labels: ["USA", "Europe", "Asia", "Africa"],
+        datasets: [{
+          label: "Investment (Billion $)",
+          data: [120, 80, 60, 25],
+          backgroundColor: ["#007bff", "#28a745", "#ffc107", "#dc3545"]
+        }]
+      }
+    });
+
+    new Chart(document.getElementById("aiUseCaseChart"), {
+      type: "doughnut",
+      data: {
+        labels: ["Healthcare", "Finance", "Retail", "Transport"],
+        datasets: [{
+          data: [30, 25, 20, 25],
+          backgroundColor: ["#17a2b8", "#ffc107", "#28a745", "#6f42c1"]
+        }]
+      }
+    });
+
+    new Chart(document.getElementById("cyberPieChart"), {
+      type: "pie",
+      data: {
+        labels: ["Network", "Cloud", "Endpoint", "Threat Intel"],
+        datasets: [{
+          data: [40, 30, 20, 10],
+          backgroundColor: ["#007bff", "#28a745", "#ffc107", "#dc3545"]
+        }]
+      }
+    });
+
+    new Chart(document.getElementById("cloudChart"), {
+      type: "line",
+      data: {
+        labels: ["2021", "2022", "2023", "2024", "2025"],
+        datasets: [{
+          label: "Cloud Adoption (%)",
+          data: [30, 45, 60, 75, 90],
+          borderColor: "purple",
+          fill: true,
+          backgroundColor: "rgba(128,0,128,0.2)"
+        }]
+      }
+    });
+
+    // Navigation
+    const links = document.querySelectorAll(".sidebar a");
+    const sections = document.querySelectorAll(".content-section");
+    links.forEach(link => {
+      link.addEventListener("click", () => {
+        sections.forEach(sec => sec.classList.remove("active"));
+        document.getElementById(link.dataset.section).classList.add("active");
+      });
+    });
+
+    // Add AI Trend function
+    function addAITrend() {
+      const trend = prompt("Enter a new AI trend:");
+      if (trend) {
+        let li = document.createElement("li");
+        li.textContent = trend;
+        document.getElementById("aiTrendList").appendChild(li);
+      }
+    }
+
+    // Theme toggle
+    function toggleTheme() {
+      const theme = document.getElementById("themeSelect").value;
+      if (theme === "dark") {
+        document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
+      }
+    }
+
+    // Save Settings (Dark/Light Mode + Notifications)
+    function saveSettings() {
+      const theme = document.getElementById("themeSelect").value;
+      const notify = document.getElementById("notifyCheck").checked;
+
+      toggleTheme();
+
+      alert("Settings saved! Notifications: " + (notify ? "Enabled" : "Disabled"));
+    }
+  </script>
+  <script>
+  // Keep chart in a variable so we can update it
+  const aiUseCaseChart = new Chart(document.getElementById("aiUseCaseChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Healthcare", "Finance", "Retail", "Transport"],
+      datasets: [{
+        data: [30, 25, 20, 25],
+        backgroundColor: ["#17a2b8", "#ffc107", "#28a745", "#6f42c1"]
+      }]
+    }
+  });
+
+  // Add AI Trend function (fix)
+  function addAITrend() {
+    const trend = prompt("Enter a new AI trend:");
+    if (trend) {
+      // Add to list
+      let li = document.createElement("li");
+      li.textContent = trend;
+      document.getElementById("aiTrendList").appendChild(li);
+
+      // Add to chart labels
+      aiUseCaseChart.data.labels.push(trend);
+
+      // Add a random value (or set default like 10)
+      aiUseCaseChart.data.datasets[0].data.push(10);
+
+      // Add random color
+      const randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
+      aiUseCaseChart.data.datasets[0].backgroundColor.push(randomColor);
+
+      // Update chart
+      aiUseCaseChart.update();
+    }
+  }
+</script>
+
+</body>
+</html>
